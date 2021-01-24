@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "todo-api"
+version = "0.1.0"
+description = "Todo-List api"
+authors = ["Mark Stefanovic <markstefanovic@hotmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.63.0"
+uvicorn = {extras = ["standard"], version = "^0.13.3"}
+python-multipart = "^0.0.5"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+sqlalchemy = "^1.3.22"
+psycopg2-binary = "^2.8.6"
+PyJWT = "^2.0.1"
+pydantic = {extras = ["email"], version = "^1.7.3"}
+
+[tool.poetry.dev-dependencies]
+python-dotenv = "^0.15.0"
+pytest = "^6.1.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
