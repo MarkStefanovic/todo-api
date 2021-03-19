@@ -1,65 +1,41 @@
-import typing
-
-import pydantic
-import uvicorn
 import fastapi
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+import uvicorn
+from fastapi import HTTPException
+from starlette.middleware.cors import CORSMiddleware
 
-from src.core import domain
-from src.service_locator import services
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-app = fastapi.FastAPI()
-
-_CREDENTIALS_EXCEPTION = fastapi.HTTPException(
-    status_code=fastapi.status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
-    headers={"WWW-Authenticate": "Bearer"},
-)
+from src import core, api
 
 
-def get_current_active_user(token: str = fastapi.Depends(oauth2_scheme)) -> domain.User:
-    username = services.jwt_adapter.username(token=token)
-    if user := services.user_service.get_user(username):
-        return user
-    raise _CREDENTIALS_EXCEPTION
+logger = core.logger.getChild("main")
 
 
-@app.post("/token", response_model=domain.Token)
-async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = fastapi.Depends(),
-) -> domain.Token:
-    if user := services.user_service.get_user(form_data.username):
-        if services.password_hasher.verify(
-            hashed_password=user.password_hash,
-            plain_password=pydantic.SecretStr(form_data.password),
-        ):
-            return services.jwt_adapter.create({"sub": user.username})
-
-    raise _CREDENTIALS_EXCEPTION
-
-
-@app.get("/users/me/", response_model=domain.User)
-async def read_users_me(
-    current_user: domain.User = fastapi.Depends(get_current_active_user),
-) -> domain.User:
-    print(f"{current_user=}")
-    return current_user
-
-
-@app.get("/users/me/items/")
-async def read_own_items(
-    current_user: domain.User = fastapi.Depends(get_current_active_user),
-) -> typing.List[typing.Dict[str, str]]:
-    return [{"item_id": "Foo", "owner": current_user.username}]
+def create_app() -> fastapi.FastAPI:
+    config = core.EnvironConfig()
+    app = fastapi.FastAPI(title="todo-api", debug=config.debug, version="0.0.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=config.allowed_hosts,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    # app.add_event_handler("startup", create_start_app_handler(app))
+    # app.add_event_handler("shutdown", create_stop_app_handler(app))
+    app.add_exception_handler(HTTPException, api.http_error_handler)
+    # app.add_exception_handler(RequestValidationError, http422_error_handler)
+    app.include_router(api.router, prefix="/api")
+    return app
 
 
 if __name__ == "__main__":
     import webbrowser
+
     webbrowser.open("http://localhost:8000/docs")
 
     import dotenv
+
     dotenv.load_dotenv(dotenv.find_dotenv())
+
+    app = create_app()
 
     uvicorn.run(app, host="0.0.0.0", port=8000)

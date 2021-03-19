@@ -2,7 +2,6 @@ __all__ = (
     "TodoApiException",
     "AuthException",
     "CredentialsException",
-    "InactiveUserException",
     "InvalidConfigurationSetting",
     "UserNotFound",
 )
@@ -22,11 +21,6 @@ class CredentialsException(AuthException):
     ...
 
 
-class InactiveUserException(AuthException):
-    def __init__(self) -> None:
-        super().__init__("User is not active")
-
-
 class InvalidConfigurationSetting(AuthException):
     def __init__(self, setting: str, message: str) -> None:
         self.setting = setting
@@ -42,4 +36,8 @@ class TokenDecodeException(AuthException):
 
 
 class UserNotFound(AuthException):
+    ...
+
+
+class UserAlreadyExists(AuthException):
     ...

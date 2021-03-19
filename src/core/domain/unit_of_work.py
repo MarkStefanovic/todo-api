@@ -1,10 +1,8 @@
 from __future__ import annotations
+
 import abc
 import types
 import typing
-
-from src.core import domain
-
 
 __all__ = ("UnitOfWork",)
 
@@ -29,9 +27,4 @@ class UnitOfWork(abc.ABC):
 
     @abc.abstractmethod
     def rollback(self) -> None:
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def user_repository(self) -> domain.UserRepo:
         raise NotImplementedError

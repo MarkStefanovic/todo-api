@@ -56,3 +56,4 @@ script
 .log
 *scratch.py
 poetry.lock
+poetry.toml

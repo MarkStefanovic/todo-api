@@ -1,3 +1,2 @@
-from src.core import adapter, domain, service
-
-
+from src.core.domain import *
+from src.core.adapter import *

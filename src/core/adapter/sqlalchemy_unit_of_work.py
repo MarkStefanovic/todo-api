@@ -1,12 +1,9 @@
-from __future__ import annotations
-
 import types
 import typing
 
 from sqlalchemy import orm
 
 from src.core import domain
-from src.core.adapter import sqlalchemy_user_repo
 
 __all__ = ("SqlAlchemyUnitOfWork",)
 
@@ -17,7 +14,6 @@ class SqlAlchemyUnitOfWork(domain.UnitOfWork):
 
     def __enter__(self) -> domain.UnitOfWork:
         self._session = self._session_factory()
-        self._user_repo = sqlalchemy_user_repo.SqlalchemyUserRepo(self._session)
         return self
 
     def __exit__(
@@ -40,7 +36,3 @@ class SqlAlchemyUnitOfWork(domain.UnitOfWork):
     def session(self) -> orm.Session:
         assert self._session is not None
         return self._session
-
-    @property
-    def user_repository(self) -> domain.UserRepo:
-        return self._user_repo
